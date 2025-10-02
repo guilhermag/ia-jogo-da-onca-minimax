@@ -69,6 +69,11 @@ class JaguarGame:
         ('7', '5'): [('6', '4'), ('7', '3')]
     }
 
+    ##TODO falta validar se um salto é na mesma direção, ideia principal aqui:
+    #   1)Pulos horizontais - verifico se todas as coordenadas estão na mesma linha e se tem ligação
+    #   2)Pulos verticais - verifico se todas as coordenadas estão na mesma coluna e se tem ligação
+    #   3)Pulos na diagonal para a direita - verifico se as linhas e colunas crescem/descressem além de terem ligação
+    #   4)Pulos na diagonal para a esquerda - mesma verificação da número 3)"
     def check_move_valid(self, player_move: Move) -> bool:
         current_board = copy.deepcopy(self.board)
         valid = False
@@ -87,7 +92,10 @@ class JaguarGame:
                 else:
                     coord = player_move.destination[counter:]
                 coord = (coord[0], coord[1])
-
+                new_origin_coord = get_coord_board(coord)
+                dest_check = current_board[new_origin_coord[0]][new_origin_coord[1]]
+                if dest_check != 'v':
+                    break
                 possible_links = self.moveset.get(origin)
                 for link in possible_links:
                     destination_coord = get_coord_board(link)
@@ -125,48 +133,9 @@ class JaguarGame:
 
        # if player_type == 'c':
        result = self.check_move_valid(player_move)
-       if result:
-           self.display_board()
        #print(player_destination)
 
-    def _get_piece_char(self, row, col):
-        """Função auxiliar para obter o caractere correto para a peça."""
-        piece = self.board[row][col]
-        if piece == 'c':
-            return 'c'  # Cachorro
-        if piece == 'o':
-            return 'o'  # Onça
-        if piece == 'v':
-            return '*'  # Espaço vazio válido
-        return ' '  # Espaço inválido (fora do tabuleiro triangular)
 
-    def display_board(self):
-        """Imprime o estado atual do tabuleiro no console."""
-
-        p = {}
-        for r in range(7):
-            for c in range(5):
-                p[f'p{r + 1}{c + 1}'] = self._get_piece_char(r, c)
-
-        # MOLDE CORRIGIDO E ALINHADO
-        board_str = rf"""
-    Tabuleiro Atual:
-
-    1   {p['p11']}---{p['p12']}---{p['p13']}---{p['p14']}---{p['p15']}
-        | \ | / | \ | / | \ | / |
-    2   {p['p21']}---{p['p22']}---{p['p23']}---{p['p24']}---{p['p25']}
-        | / | \ | / | \ | / | \ |
-    3   {p['p31']}---{p['p32']}---{p['p33']}---{p['p34']}---{p['p35']}
-        | \ | / | \ | / | \ | / |
-    4   {p['p41']}---{p['p42']}---{p['p43']}---{p['p44']}---{p['p45']}
-        | / | \ | / | \ | / | \ |
-    5   {p['p51']}---{p['p52']}---{p['p53']}---{p['p54']}---{p['p55']}
-              \  |  /   \  |  /
-    6          {p['p62']}---{p['p63']}---{p['p64']}
-                 \ | /   \ | /
-    7          {p['p71']}---{p['p73']}---{p['p75']}
-          """
-        print(board_str)
 
 
 def get_coord_board(coord) -> tuple[int, int]:
