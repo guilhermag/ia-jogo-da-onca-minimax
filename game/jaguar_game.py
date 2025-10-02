@@ -102,7 +102,7 @@ class JaguarGame:
                     dest = current_board[destination_coord[0]][destination_coord[1]]
                     if dest == 'c':
                         dog_possible_links = self.moveset.get(link)
-                        if coord in dog_possible_links:
+                        if coord in dog_possible_links and self.check_link_jump(origin, link, coord):
                             current_board[destination_coord[0]][destination_coord[1]] = 'v'
                             current_board[origin_coord[0]][origin_coord[1]] = 'v'
                             new_origin_coord = get_coord_board(coord)
@@ -133,7 +133,19 @@ class JaguarGame:
 
        # if player_type == 'c':
        result = self.check_move_valid(player_move)
-       #print(player_destination)
+       print(result)
+
+
+    def check_link_jump(self, origin, middle, destination):
+        possible_links_origin = self.moveset.get(origin)
+        possible_links_end = self.moveset.get(destination)
+        valid_start = False
+        valid_end = False
+        if middle in possible_links_origin:
+            valid_start = True
+        if middle in possible_links_end:
+            valid_end = True
+        return valid_start and valid_end
 
 
 
