@@ -1,6 +1,6 @@
 import copy
 from game.move import Move
-# from tabulate import tabulate
+from tabulate import tabulate
 
 class JaguarGame:
     board = [
@@ -71,8 +71,9 @@ class JaguarGame:
     }
 
     def print_current_board(self):
-        for row in self.board:
-            print(row)
+        # for row in self.board:
+        #     print(row)
+        print(tabulate(self.board, headers='firstrow', tablefmt='fancy_grid'))
         print()
 
 
