@@ -1,6 +1,6 @@
 import copy
 from game.move import Move
-from typing import List
+# from tabulate import tabulate
 
 class JaguarGame:
     board = [
@@ -70,7 +70,10 @@ class JaguarGame:
         ('7', '5'): [('6', '4'), ('7', '3')]
     }
 
-
+    def print_current_board(self):
+        for row in self.board:
+            print(row)
+        print()
 
 
 
