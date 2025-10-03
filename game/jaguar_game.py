@@ -1,40 +1,41 @@
 import copy
 from game.move import Move
+from typing import List
 
 class JaguarGame:
-    # board = [
-    #     # (1,1), (1,2), (1,3), (1,4), (1,5)
-    #     ['c', 'c', 'c', 'c', 'c'],
-    #     # (2,1), (2,2), (2,3), (2,4), (2,5)
-    #     ['c', 'c', 'c', 'c', 'c'],
-    #     # (3,1), (3,2), (3,3), (3,4), (3,5)
-    #     ['c', 'c', 'o', 'c', 'c'],
-    #     # (4,1), (4,2), (4,3), (4,4), (4,5)
-    #     ['v', 'v', 'v', 'v', 'v'],
-    #     # (5,1), (5,2), (5,3), (5,4), (5,5)
-    #     ['v', 'v', 'v', 'v', 'v'],
-    #     # (6,1), (6,2), (6,3), (6,4), (6,5)
-    #     ['', 'v', 'v', 'v', ''],
-    #     # (7,1), (7,2), (7,3), (7,4), (7,5)
-    #     ['v', '', 'v', '', 'v'],
-    # ]
-
     board = [
         # (1,1), (1,2), (1,3), (1,4), (1,5)
         ['c', 'c', 'c', 'c', 'c'],
         # (2,1), (2,2), (2,3), (2,4), (2,5)
         ['c', 'c', 'c', 'c', 'c'],
         # (3,1), (3,2), (3,3), (3,4), (3,5)
-        ['v', 'c', 'v', 'c', 'v'],
+        ['c', 'c', 'o', 'c', 'c'],
         # (4,1), (4,2), (4,3), (4,4), (4,5)
-        ['c', 'v', 'v', 'c', 'v'],
+        ['v', 'v', 'v', 'v', 'v'],
         # (5,1), (5,2), (5,3), (5,4), (5,5)
-        ['v', 'v', 'o', 'v', 'v'],
+        ['v', 'v', 'v', 'v', 'v'],
         # (6,1), (6,2), (6,3), (6,4), (6,5)
         ['', 'v', 'v', 'v', ''],
         # (7,1), (7,2), (7,3), (7,4), (7,5)
         ['v', '', 'v', '', 'v'],
     ]
+
+    # board = [
+    #     # (1,1), (1,2), (1,3), (1,4), (1,5)
+    #     ['c', 'c', 'c', 'c', 'c'],
+    #     # (2,1), (2,2), (2,3), (2,4), (2,5)
+    #     ['c', 'c', 'c', 'c', 'c'],
+    #     # (3,1), (3,2), (3,3), (3,4), (3,5)
+    #     ['v', 'c', 'v', 'c', 'v'],
+    #     # (4,1), (4,2), (4,3), (4,4), (4,5)
+    #     ['c', 'v', 'v', 'c', 'v'],
+    #     # (5,1), (5,2), (5,3), (5,4), (5,5)
+    #     ['v', 'v', 'o', 'v', 'v'],
+    #     # (6,1), (6,2), (6,3), (6,4), (6,5)
+    #     ['', 'v', 'v', 'v', ''],
+    #     # (7,1), (7,2), (7,3), (7,4), (7,5)
+    #     ['v', '', 'v', '', 'v'],
+    # ]
     moveset = {
         ('1', '1'): [('1', '2'), ('2', '1'), ('2', '2')],
         ('1', '2'): [('1', '1'), ('1', '3'), ('2', '2')],
@@ -53,7 +54,7 @@ class JaguarGame:
         ('3', '5'): [('2', '4'), ('2', '5'), ('3', '4'), ('4', '4'), ('4', '5')],
         ('4', '1'): [('3', '1'), ('4', '2'), ('5', '1')],
         ('4', '2'): [('3', '1'), ('3', '2'), ('3', '3'), ('4', '1'), ('4', '3'), ('5', '1'), ('5', '2'), ('5', '3')],
-        ('4', '3'): [('3', '3'), ('4', '2'), ('4', '4'), ('5', '2')],
+        ('4', '3'): [('3', '3'), ('4', '2'), ('4', '4'), ('5', '3')],
         ('4', '4'): [('3', '3'), ('3', '4'), ('3', '5'), ('4', '3'), ('4', '5'), ('5', '3'), ('5', '4'), ('5', '5')],
         ('4', '5'): [('3', '5'), ('4', '4'), ('5', '5')],
         ('5', '1'): [('4', '1'), ('4', '2'), ('5', '2')],
@@ -69,11 +70,11 @@ class JaguarGame:
         ('7', '5'): [('6', '4'), ('7', '3')]
     }
 
-    ##TODO falta validar se um salto é na mesma direção, ideia principal aqui:
-    #   1)Pulos horizontais - verifico se todas as coordenadas estão na mesma linha e se tem ligação
-    #   2)Pulos verticais - verifico se todas as coordenadas estão na mesma coluna e se tem ligação
-    #   3)Pulos na diagonal para a direita - verifico se as linhas e colunas crescem/descressem além de terem ligação
-    #   4)Pulos na diagonal para a esquerda - mesma verificação da número 3)"
+
+
+
+
+
     def check_move_valid(self, player_move: Move) -> bool:
         current_board = copy.deepcopy(self.board)
         valid = False
@@ -102,7 +103,7 @@ class JaguarGame:
                     dest = current_board[destination_coord[0]][destination_coord[1]]
                     if dest == 'c':
                         dog_possible_links = self.moveset.get(link)
-                        if coord in dog_possible_links and self.check_link_jump(origin, link, coord):
+                        if coord in dog_possible_links and self.check_link_jump(origin, link, coord) and check_jump_direction(origin, link, coord, current_board):
                             current_board[destination_coord[0]][destination_coord[1]] = 'v'
                             current_board[origin_coord[0]][origin_coord[1]] = 'v'
                             new_origin_coord = get_coord_board(coord)
@@ -130,13 +131,10 @@ class JaguarGame:
 
     def move_player(self, move_str: str):
        player_move = Move.from_string(move_str)
-
-       # if player_type == 'c':
-       result = self.check_move_valid(player_move)
-       print(result)
+       self.check_move_valid(player_move)
 
 
-    def check_link_jump(self, origin, middle, destination):
+    def check_link_jump(self, origin: tuple[str, str], middle: tuple[str, str], destination: tuple[str, str]):
         possible_links_origin = self.moveset.get(origin)
         possible_links_end = self.moveset.get(destination)
         valid_start = False
@@ -148,9 +146,49 @@ class JaguarGame:
         return valid_start and valid_end
 
 
-
-
-def get_coord_board(coord) -> tuple[int, int]:
+def get_coord_board(coord: tuple[str, str]) -> tuple[int, int]:
     coord_x =  int(coord[0]) - 1
     coord_y = int(coord[1]) - 1
     return coord_x, coord_y
+
+def check_jump_direction(origin: tuple[str, str],
+                         middle: tuple[str, str],
+                         destination: tuple[str, str],
+                         board) -> bool:
+    verification_list = []
+
+    if origin[0] == middle[0] == destination[0]:
+        verification_list.append(True)
+
+    if origin[1] == middle[1] == destination[1]:
+        verification_list.append(True)
+
+    origin_int = [int(origin[0]), int(origin[1])]
+    middle_int = [int(middle[0]), int(middle[1])]
+    destination_int = [int(destination[0]), int(destination[1])]
+
+    x_check = origin_int[0] < middle_int[0] < destination_int[0]
+    y_check = origin_int[1] < middle_int[1] < destination_int[1]
+    if x_check and y_check:
+        verification_list.append(True)
+
+    x_check = origin_int[0] > middle_int[0] > destination_int[0]
+    y_check = origin_int[1] < middle_int[1] < destination_int[1]
+
+    if x_check and y_check:
+        verification_list.append(True)
+
+    x_check = origin_int[0] > middle_int[0] > destination_int[0]
+    y_check = origin_int[1] > middle_int[1] > destination_int[1]
+
+    if x_check and y_check:
+        verification_list.append(True)
+
+    x_check = origin_int[0] < middle_int[0] < destination_int[0]
+    y_check = origin_int[1] > middle_int[1] > destination_int[1]
+
+    if x_check and y_check:
+        verification_list.append(True)
+
+
+    return len(verification_list) == 1

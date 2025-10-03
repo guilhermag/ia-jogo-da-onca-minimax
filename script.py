@@ -3,12 +3,16 @@ from game.jaguar_game import JaguarGame
 
 def main(name):
     game = JaguarGame()
-
-
-
-
-    # print(game.moveset[(1,2)])  # Press F9 to toggle the breakpoint.
-    print(game.move_player("o s 3 5 3 3 5 3 3 3 1"))  # Press F9 to toggle the breakpoint.
+    game.move_player('o m 3 3 4 3')
+    print(game.board)
+    game.move_player('c m 3 5 4 4')
+    print(game.board)
+    game.move_player('o m 4 3 5 3')
+    print(game.board)
+    game.move_player('c m 3 1 4 1')
+    print(game.board)
+    game.move_player('o s 3 5 3 3 5 3 3 3 1')
+    print(game.board)
 
 
 # Press the green button in the gutter to run the script.
