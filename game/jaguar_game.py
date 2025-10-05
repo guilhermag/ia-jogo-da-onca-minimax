@@ -19,22 +19,26 @@ class JaguarGame:
         # (7,1), (7,2), (7,3), (7,4), (7,5)
         ['v', '', 'v', '', 'v'],
     ]
+    score_board = {
+        'o': 0,
+        'o_position': ('3', '3')
+    }
 
     # board = [
     #     # (1,1), (1,2), (1,3), (1,4), (1,5)
     #     ['c', 'c', 'c', 'c', 'c'],
     #     # (2,1), (2,2), (2,3), (2,4), (2,5)
-    #     ['c', 'c', 'c', 'c', 'c'],
+    #     ['c', 'c', 'c', 'v', 'c'],
     #     # (3,1), (3,2), (3,3), (3,4), (3,5)
-    #     ['v', 'c', 'v', 'c', 'v'],
+    #     ['v', 'c', 'v', 'v', 'v'],
     #     # (4,1), (4,2), (4,3), (4,4), (4,5)
-    #     ['c', 'v', 'v', 'c', 'v'],
+    #     ['v', 'v', 'v', 'v', 'v'],
     #     # (5,1), (5,2), (5,3), (5,4), (5,5)
-    #     ['v', 'v', 'o', 'v', 'v'],
+    #     ['v', 'v', 'c', 'v', 'v'],
     #     # (6,1), (6,2), (6,3), (6,4), (6,5)
-    #     ['', 'v', 'v', 'v', ''],
+    #     ['', 'v', 'v', 'c', ''],
     #     # (7,1), (7,2), (7,3), (7,4), (7,5)
-    #     ['v', '', 'v', '', 'v'],
+    #     ['c', '', 'c', '', 'o'],
     # ]
     moveset = {
         ('1', '1'): [('1', '2'), ('2', '1'), ('2', '2')],
@@ -113,6 +117,8 @@ class JaguarGame:
                             new_origin_coord = get_coord_board(coord)
                             current_board[new_origin_coord[0]][new_origin_coord[1]] = 'o'
                             valid = True
+                            self.score_board['o'] += 1
+                            self.score_board['o_position'] = player_move.destination
                             break
                 if not valid:
                     break
@@ -129,11 +135,17 @@ class JaguarGame:
                 current_board[origin_coord[0]][origin_coord[1]] = 'v'
                 current_board[destination_coord[0]][destination_coord[1]] = player_move.player_type
                 valid = True
+                if player_move.player_type == 'o':
+                    self.score_board['o_position'] = player_move.destination
         if valid:
             self.board = current_board
         return valid
 
     def move_player(self, move_str: str):
+       winner = self.check_winner()
+       if winner:
+           print("Game over! Winner: ", winner)
+           return
        player_move = Move.from_string(move_str)
        self.check_move_valid(player_move)
 
@@ -148,6 +160,34 @@ class JaguarGame:
         if middle in possible_links_end:
             valid_end = True
         return valid_start and valid_end
+    
+    def check_winner(self) -> str | None:
+        if self.score_board['o'] >= 5:
+            return 'o'
+        if not self.check_jaguar_moves():
+            return 'c'
+        return None
+    
+    def check_jaguar_moves(self) -> bool:
+        o_position = self.score_board['o_position']
+        possible_moves = self.moveset.get(o_position)
+        for move in possible_moves:
+            coord = get_coord_board(move)
+            dest = self.board[coord[0]][coord[1]]
+            if dest == 'v':
+                return True
+        possible_links = self.moveset.get(o_position)
+        for link in possible_links:
+            link_coord = get_coord_board(link)
+            link_dest = self.board[link_coord[0]][link_coord[1]]
+            if link_dest == 'c':
+                dog_possible_links = self.moveset.get(link)
+                for dog_link in dog_possible_links:
+                    dog_link_coord = get_coord_board(dog_link)
+                    dog_link_dest = self.board[dog_link_coord[0]][dog_link_coord[1]]
+                    if dog_link_dest == 'v' and check_jump_direction(o_position, link, dog_link, self.board):
+                        return True
+        return False
 
 
 def get_coord_board(coord: tuple[str, str]) -> tuple[int, int]:
