@@ -2,6 +2,7 @@ import copy
 from game.move import Move
 from tabulate import tabulate
 
+
 class JaguarGame:
     board = [
         # (1,1), (1,2), (1,3), (1,4), (1,5)
@@ -188,6 +189,73 @@ class JaguarGame:
                     if dog_link_dest == 'v' and check_jump_direction(o_position, link, dog_link, self.board):
                         return True
         return False
+    
+    def get_valid_moves(self, player_type: str) -> list[Move]:
+        valid_moves = []
+        if player_type == 'o':
+            o_position = self.score_board['o_position']
+            possible_moves = self.moveset.get(o_position)
+            for move in possible_moves:
+                coord = get_coord_board(move)
+                dest = self.board[coord[0]][coord[1]]
+                if dest == 'v':
+                    valid_moves.append(Move('o', 'm',0 , o_position, move))
+            possible_links = self.moveset.get(o_position)
+            for link in possible_links:
+                current_board = copy.deepcopy(self.board)
+                link_coord = get_coord_board(link)
+                link_dest = current_board[link_coord[0]][link_coord[1]]
+                if link_dest == 'c':
+                    dog_possible_links = self.moveset.get(link)
+                    for dog_link in dog_possible_links:
+                        dog_link_coord = get_coord_board(dog_link)
+                        dog_link_dest = current_board[dog_link_coord[0]][dog_link_coord[1]]
+                        if dog_link_dest == 'v' and check_jump_direction(o_position, link, dog_link, current_board):
+                            can_jump = True
+                            jump_counter = 1
+                            o_position_coord = get_coord_board(o_position)
+                            current_board[link_coord[0]][link_coord[1]] = 'v'
+                            current_board[dog_link_coord[0]][dog_link_coord[1]] = 'o'
+                            current_board[o_position_coord[0]][o_position_coord[1]] = 'v'
+                            final_destination = (dog_link[0], dog_link[1])
+                            destination = (dog_link[0], dog_link[1])
+                            while can_jump:
+                                origin = destination
+                                possible_links_loop = self.moveset.get(origin)
+                                can_jump = False
+                                for initial_link in possible_links_loop:
+                                    link_coord_loop = get_coord_board(initial_link)
+                                    link_dest_loop = current_board[link_coord_loop[0]][link_coord_loop[1]]
+                                    if link_dest_loop == 'c':
+                                        dog_possible_links_loop = self.moveset.get(initial_link)
+                                        for dog_link_loop in dog_possible_links_loop:
+                                            dog_l_coord = get_coord_board(dog_link_loop)
+                                            dog_l_dest = current_board[dog_l_coord[0]][dog_l_coord[1]]
+                                            if dog_l_dest == 'v' and check_jump_direction(origin, initial_link, dog_link_loop, current_board):
+                                                jump_counter += 1
+                                                can_jump = True
+                                                destination = (dog_link_loop[0], dog_link_loop[1])
+                                                current_board[link_coord_loop[0]][link_coord_loop[1]] = 'v'
+                                                current_board[dog_l_coord[0]][dog_l_coord[1]] = 'o'
+                                                final_destination = final_destination + destination
+                                                break
+                                        if can_jump:
+                                            break
+                            valid_moves.append(Move('o', 's',jump_counter, o_position, final_destination))
+        
+        else:
+            for i in range(len(self.board)):
+                for j in range(len(self.board[i])):
+                    if self.board[i][j] == 'c':
+                        origin = (str(i + 1), str(j + 1))
+                        possible_moves = self.moveset.get(origin)
+                        for move in possible_moves:
+                            coord = get_coord_board(move)
+                            dest = self.board[coord[0]][coord[1]]
+                            if dest == 'v':
+                                valid_moves.append(Move('c', 'm',0,  origin, move))
+        return valid_moves
+
 
 
 def get_coord_board(coord: tuple[str, str]) -> tuple[int, int]:
