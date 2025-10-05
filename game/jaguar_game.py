@@ -150,7 +150,6 @@ class JaguarGame:
        player_move = Move.from_string(move_str)
        self.check_move_valid(player_move)
 
-
     def check_link_jump(self, origin: tuple[str, str], middle: tuple[str, str], destination: tuple[str, str]):
         possible_links_origin = self.moveset.get(origin)
         possible_links_end = self.moveset.get(destination)
@@ -256,6 +255,19 @@ class JaguarGame:
                                 valid_moves.append(Move('c', 'm',0,  origin, move))
         return valid_moves
 
+    def heuristic_evaluation(self) -> int:
+        score = 0
+        score += self.score_board['o'] * 100
+        if not self.check_jaguar_moves():
+            score -= 5000
+        moves = self.get_valid_moves('o')
+        score += len(moves) * 10
+        filtered_moves = [move for move in moves if move.move_type == 's']
+        for move_o in filtered_moves:
+            score += move_o.number_of_jumps * 20
+        moves_c = self.get_valid_moves('c')
+        score -= len(moves_c) * 5
+        return score
 
 
 def get_coord_board(coord: tuple[str, str]) -> tuple[int, int]:

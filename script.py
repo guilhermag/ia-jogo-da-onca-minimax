@@ -11,10 +11,10 @@ def main(name):
     game.move_player('o m 4 3 5 3')
     # game.print_current_board()
     game.move_player('c m 3 1 4 1')
-    # game.print_current_board()
-    # valid_moves = game.get_valid_moves('o')
-    # for move in valid_moves:
-    #     print(move)
+    game.print_current_board()
+    valid_moves = game.get_valid_moves('c')
+    for move in valid_moves:
+        print(move)
     game.move_player('o s 3 5 3 3 5 3 3 3 1')
     # game.print_current_board()
 
