@@ -7,6 +7,7 @@ def main(name):
     game = JaguarGame()
     current_player_is_maximizing = True 
     depth = 5
+    start_time = time.time() 
     try:
         r = redis.Redis(host='localhost', port=6379, db=0)
         print("Conectado ao Redis.")
@@ -35,8 +36,11 @@ def main(name):
         # time.sleep(1) # Pausa para facilitar a visualização
         
     winner = game.check_winner()
+    end_time = time.time()  # Adiciona o tempo de fim do jogo
+    duration = end_time - start_time 
     print("\n--- Fim do Jogo ---")
     print(f"O vencedor é: {winner}!")
+    print(f"O jogo durou {duration:.2f} segundos.") 
     
     
 

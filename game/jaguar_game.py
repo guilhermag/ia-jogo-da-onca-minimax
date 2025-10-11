@@ -254,7 +254,8 @@ class JaguarGame:
                                                 break
                                         if can_jump:
                                             break
-                            valid_moves.append(Move('o', 's',jump_counter, o_position, final_destination))
+                            if (o_position != final_destination):
+                                valid_moves.append(Move('o', 's',jump_counter, o_position, final_destination))
         
         else:
             for i in range(len(self.board)):
@@ -292,7 +293,8 @@ class JaguarGame:
         score += len(moves) * 10
         filtered_moves = [move for move in moves if move.move_type == 's']
         for move_o in filtered_moves:
-            score += move_o.number_of_jumps * 100
+            sum_jumps = (move_o.number_of_jumps * 100) + (move_o.number_of_jumps * 50 * self.score_board['o'])
+            score += sum_jumps
         moves_c = self.get_valid_moves('c')
         score -= len(moves_c) * 5
         return score
