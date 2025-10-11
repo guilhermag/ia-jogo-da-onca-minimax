@@ -1,22 +1,44 @@
 from game.jaguar_game import JaguarGame
-
+from game.move import Move
+import redis
+import time
 
 def main(name):
     game = JaguarGame()
+    current_player_is_maximizing = True 
+    depth = 5
+    try:
+        r = redis.Redis(host='localhost', port=6379, db=0)
+        print("Conectado ao Redis.")
+    except redis.exceptions.ConnectionError as e:
+        print("Não foi possível conectar ao Redis. Rodando em modo offline.")
+    while game.check_winner() is None:
+        print(game.score_board)
+        print(f"\n--- Turno da {'Onça' if current_player_is_maximizing else 'Cães'} ---")
+        
 
-    # game.move_player('o m 3 3 4 3')
-    # # game.print_current_board()
-    # game.move_player('c m 3 5 4 4')
-    # # game.print_current_board()
-    # game.move_player('o m 4 3 5 3')
-    # # game.print_current_board()
-    # game.move_player('c m 3 1 4 1')
-    # game.print_current_board()
-    # valid_moves = game.get_valid_moves('c')
-    # for move in valid_moves:
-    #     print(move)
-    # game.move_player('o s 3 5 3 3 5 3 3 3 1')
-    # game.print_current_board()
+        best_move = find_best_move(game, depth, current_player_is_maximizing)
+
+        if best_move:
+            print(f"A IA escolhe: {best_move}")
+            
+            # Aplica o movimento no tabuleiro
+            move = Move.from_string(best_move)
+            game.check_move_valid(move)
+            
+            # Alterna para o próximo jogador
+            current_player_is_maximizing = not current_player_is_maximizing
+        else:
+            print("Não há movimentos válidos. Fim de jogo inesperado.")
+            break
+        
+        # time.sleep(1) # Pausa para facilitar a visualização
+        
+    winner = game.check_winner()
+    print("\n--- Fim do Jogo ---")
+    print(f"O vencedor é: {winner}!")
+    
+    
 
 def minimax(game: JaguarGame, depth, isMaximizingPlayer, alpha, beta):
     if depth == 0 or game.score_board['c'] or game.score_board['o'] >= 5:
@@ -43,8 +65,12 @@ def minimax(game: JaguarGame, depth, isMaximizingPlayer, alpha, beta):
 
 def find_best_move(game: JaguarGame, depth: int, isMaximizingPlayer: bool):
     best_move = None
-    best_score = float('-inf')
-    player = 'o' if isMaximizingPlayer else 'c'
+    if isMaximizingPlayer:
+        player = 'o'
+        best_score = float('-inf')
+    else:
+        player = 'c'
+        best_score = float('inf')
     moves = game.get_valid_moves(player)
 
     for move in moves:

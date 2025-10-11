@@ -116,7 +116,7 @@ class JaguarGame:
                             current_board[new_origin_coord[0]][new_origin_coord[1]] = 'o'
                             valid = True
                             self.score_board['o'] += 1
-                            self.score_board['o_position'] = player_move.destination
+                            self.score_board['o_position'] = coord
                             break
                 if not valid:
                     break
@@ -275,10 +275,24 @@ class JaguarGame:
         if not self.check_jaguar_moves():
             score -= 5000
         moves = self.get_valid_moves('o')
+        position_o = self.score_board['o_position']
+        possible_links = self.moveset.get(position_o)
+        for link in possible_links:
+            link_coord = get_coord_board(link)
+            link_dest = self.board[link_coord[0]][link_coord[1]]
+            if link_dest == 'c':
+                c_possible_links = self.moveset.get(link)
+                score -= 20
+                for c_link in c_possible_links:
+                    c_link_coord = get_coord_board(c_link)
+                    c_link_dest = self.board[c_link_coord[0]][c_link_coord[1]]
+                    if c_link_dest != 'v' and check_jump_direction(position_o, link, c_link, self.board) and self.check_link_jump(position_o, link, c_link):
+                        score -= 100
+                
         score += len(moves) * 10
         filtered_moves = [move for move in moves if move.move_type == 's']
         for move_o in filtered_moves:
-            score += move_o.number_of_jumps * 20
+            score += move_o.number_of_jumps * 100
         moves_c = self.get_valid_moves('c')
         score -= len(moves_c) * 5
         return score
