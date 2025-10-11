@@ -9,6 +9,15 @@ class Move:
     origin: Tuple[str, str]
     destination: Tuple[str, ...]
 
+    def to_string(self) -> str:
+        if self.move_type == 'm':
+            return f"{self.player_type} m {self.origin[0]} {self.origin[1]} {self.destination[0]} {self.destination[1]}"
+        
+        elif self.move_type == 's':
+            dest_str = " ".join(self.destination)
+            return f"o s {self.number_of_jumps} {self.origin[0]} {self.origin[1]} {dest_str}"
+        
+        return ""
 
     @classmethod
     def from_string(cls, move_str: str) -> "Move":
@@ -31,3 +40,5 @@ class Move:
             origin=origin,
             destination=destination
         )
+    
+    

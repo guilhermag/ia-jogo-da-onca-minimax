@@ -2,7 +2,6 @@ import copy
 from game.move import Move
 from tabulate import tabulate
 
-
 class JaguarGame:
     board = [
         # (1,1), (1,2), (1,3), (1,4), (1,5)
@@ -22,7 +21,8 @@ class JaguarGame:
     ]
     score_board = {
         'o': 0,
-        'o_position': ('3', '3')
+        'o_position': ('3', '3'),
+        'c': False
     }
 
     # board = [
@@ -81,9 +81,6 @@ class JaguarGame:
         print(tabulate(self.board, headers='firstrow', tablefmt='fancy_grid'))
         print()
 
-
-
-
     def check_move_valid(self, player_move: Move) -> bool:
         current_board = copy.deepcopy(self.board)
         valid = False
@@ -140,7 +137,24 @@ class JaguarGame:
                     self.score_board['o_position'] = player_move.destination
         if valid:
             self.board = current_board
+            self.score_board['c'] = len(self.get_valid_moves('o')) == 0
         return valid
+
+    def clone_game(self):
+        cloned_game = JaguarGame()
+        cloned_game.board = copy.deepcopy(self.board)
+        cloned_game.score_board = copy.deepcopy(self.score_board)
+        return cloned_game
+    
+    def get_children(self, isMaximizingPlayer: bool) -> list['JaguarGame']:
+        children = []
+        player = 'o' if isMaximizingPlayer else 'c'
+        possible_moves = self.get_valid_moves(player)
+        for move in possible_moves:
+            cloned_game = self.clone_game()
+            cloned_game.check_move_valid(move)
+            children.append(cloned_game)
+        return children
 
     def move_player(self, move_str: str):
        winner = self.check_winner()
@@ -268,7 +282,6 @@ class JaguarGame:
         moves_c = self.get_valid_moves('c')
         score -= len(moves_c) * 5
         return score
-
 
 def get_coord_board(coord: tuple[str, str]) -> tuple[int, int]:
     coord_x =  int(coord[0]) - 1
