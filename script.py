@@ -1,7 +1,9 @@
 from game.jaguar_game import JaguarGame
 from game.move import Move
+from multiprocessing import Pool
 import redis
 import time
+import os
 
 def main(name):
     game = JaguarGame()
@@ -43,6 +45,13 @@ def main(name):
     print(f"O jogo durou {duration:.2f} segundos.") 
     
     
+# Mantenha esta função fora da classe JaguarGame
+def evaluate_child_state(args):
+    """Função auxiliar para a busca paralela."""
+    cloned_game, depth, is_maximizing_player = args
+    # Chama o Minimax para o nível recursivo (o jogador oposto)
+    score = minimax(cloned_game, depth - 1, not is_maximizing_player, float('-inf'), float('inf'))
+    return score
 
 def minimax(game: JaguarGame, depth, isMaximizingPlayer, alpha, beta):
     if depth == 0 or game.score_board['c'] or game.score_board['o'] >= 5:
@@ -76,21 +85,29 @@ def find_best_move(game: JaguarGame, depth: int, isMaximizingPlayer: bool):
         player = 'c'
         best_score = float('inf')
     moves = game.get_valid_moves(player)
-
+    tasks = []
     for move in moves:
         cloned_game = game.clone_game()
         cloned_game.check_move_valid(move)
-        score = minimax(cloned_game, depth - 1,  not isMaximizingPlayer, float('-inf'), float('inf'))
-        
+        tasks.append((cloned_game, depth, isMaximizingPlayer))
+
+    #notebook pessoal
+    # num_cores = min(os.cpu_count(), 4)
+    #ufpr
+    num_cores = min(os.cpu_count(), 14)
+    with Pool(processes=num_cores) as pool:
+            scores = pool.map(evaluate_child_state, tasks)
+    
+    for score, move in zip(scores, moves):
         if isMaximizingPlayer:
             if score > best_score:
                 best_score = score
                 best_move = move
-        else:
+        else: 
             if score < best_score:
                 best_score = score
                 best_move = move
-            
+                
     return best_move.to_string() if best_move else None
 
 if __name__ == '__main__':
