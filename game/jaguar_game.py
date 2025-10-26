@@ -1,46 +1,60 @@
 import copy
 from game.move import Move
 from tabulate import tabulate
+from typing import Tuple, List, Dict, Any, Union
+
+
+def get_coord_board(coord: tuple[str, str]) -> tuple[int, int]:
+    coord_x =  int(coord[0]) - 1
+    coord_y = int(coord[1]) - 1
+    return coord_x, coord_y
+
+
+
+def check_jump_direction(origin: tuple[str, str],
+                         middle: tuple[str, str],
+                         destination: tuple[str, str],
+                         board) -> bool:
+    verification_list = []
+
+    if origin[0] == middle[0] == destination[0]:
+        verification_list.append(True)
+
+    if origin[1] == middle[1] == destination[1]:
+        verification_list.append(True)
+
+    origin_int = [int(origin[0]), int(origin[1])]
+    middle_int = [int(middle[0]), int(middle[1])]
+    destination_int = [int(destination[0]), int(destination[1])]
+
+    x_check = origin_int[0] < middle_int[0] < destination_int[0]
+    y_check = origin_int[1] < middle_int[1] < destination_int[1]
+    if x_check and y_check:
+        verification_list.append(True)
+
+    x_check = origin_int[0] > middle_int[0] > destination_int[0]
+    y_check = origin_int[1] < middle_int[1] < destination_int[1]
+
+    if x_check and y_check:
+        verification_list.append(True)
+
+    x_check = origin_int[0] > middle_int[0] > destination_int[0]
+    y_check = origin_int[1] > middle_int[1] > destination_int[1]
+
+    if x_check and y_check:
+        verification_list.append(True)
+
+    x_check = origin_int[0] < middle_int[0] < destination_int[0]
+    y_check = origin_int[1] > middle_int[1] > destination_int[1]
+
+    if x_check and y_check:
+        verification_list.append(True)
+
+
+    return len(verification_list) == 1
 
 class JaguarGame:
-    board = [
-        # (1,1), (1,2), (1,3), (1,4), (1,5)
-        ['c', 'c', 'c', 'c', 'c'],
-        # (2,1), (2,2), (2,3), (2,4), (2,5)
-        ['c', 'c', 'c', 'c', 'c'],
-        # (3,1), (3,2), (3,3), (3,4), (3,5)
-        ['c', 'c', 'o', 'c', 'c'],
-        # (4,1), (4,2), (4,3), (4,4), (4,5)
-        ['v', 'v', 'v', 'v', 'v'],
-        # (5,1), (5,2), (5,3), (5,4), (5,5)
-        ['v', 'v', 'v', 'v', 'v'],
-        # (6,1), (6,2), (6,3), (6,4), (6,5)
-        ['', 'v', 'v', 'v', ''],
-        # (7,1), (7,2), (7,3), (7,4), (7,5)
-        ['v', '', 'v', '', 'v'],
-    ]
-    score_board = {
-        'o': 0,
-        'o_position': ('3', '3'),
-        'c': False
-    }
-
-    # board = [
-    #     # (1,1), (1,2), (1,3), (1,4), (1,5)
-    #     ['c', 'c', 'c', 'c', 'c'],
-    #     # (2,1), (2,2), (2,3), (2,4), (2,5)
-    #     ['c', 'c', 'c', 'v', 'c'],
-    #     # (3,1), (3,2), (3,3), (3,4), (3,5)
-    #     ['v', 'c', 'v', 'v', 'v'],
-    #     # (4,1), (4,2), (4,3), (4,4), (4,5)
-    #     ['v', 'v', 'v', 'v', 'v'],
-    #     # (5,1), (5,2), (5,3), (5,4), (5,5)
-    #     ['v', 'v', 'c', 'v', 'v'],
-    #     # (6,1), (6,2), (6,3), (6,4), (6,5)
-    #     ['', 'v', 'v', 'c', ''],
-    #     # (7,1), (7,2), (7,3), (7,4), (7,5)
-    #     ['c', '', 'c', '', 'o'],
-    # ]
+    
     moveset = {
         ('1', '1'): [('1', '2'), ('2', '1'), ('2', '2')],
         ('1', '2'): [('1', '1'), ('1', '3'), ('2', '2')],
@@ -74,6 +88,35 @@ class JaguarGame:
         ('7', '3'): [('6', '3'), ('7', '1'), ('7', '5')],
         ('7', '5'): [('6', '4'), ('7', '3')]
     }
+
+    def __init__(self, board_state: List[List[str]] = None, score_data: Dict[str, Union[int, Tuple[str, str], bool]] = None):
+        if board_state is None:
+            self.board = [
+                    ['c', 'c', 'c', 'c', 'c'], ['c', 'c', 'c', 'c', 'c'],
+                    ['c', 'c', 'o', 'c', 'c'], ['v', 'v', 'v', 'v', 'v'],
+                    ['v', 'v', 'v', 'v', 'v'], ['', 'v', 'v', 'v', ''],
+                    ['v', '', 'v', '', 'v'],
+                ]
+            self.score_board = {'o': 0, 'o_position': ('3', '3'), 'c': False}
+        else:
+            self.board = board_state
+            self.score_board = self._recalculate_score_board()
+
+
+    def _recalculate_score_board(self) -> Dict[str, Union[int, Tuple[str, str], bool]]:
+        o_pos = ('0', '0')
+        dogs_on_board = 0
+            
+        for r_idx, row in enumerate(self.board):
+            for c_idx, cell in enumerate(row):
+                if cell == 'o':
+                    o_pos = (str(r_idx + 1), str(c_idx + 1))
+                if cell == 'c':
+                    dogs_on_board += 1
+                        
+        dogs_captured = 14 - dogs_on_board
+        return {'o': dogs_captured, 'o_position': o_pos, 'c': False}
+
 
     def print_current_board(self):
         # for row in self.board:
@@ -137,12 +180,12 @@ class JaguarGame:
                     self.score_board['o_position'] = player_move.destination
         if valid:
             self.board = current_board
-            self.score_board['c'] = len(self.get_valid_moves('o')) == 0
+            self.score_board = self._recalculate_score_board()
+            self.score_board['c'] = not self.check_jaguar_moves()
         return valid
 
     def clone_game(self):
-        cloned_game = JaguarGame()
-        cloned_game.board = copy.deepcopy(self.board)
+        cloned_game = JaguarGame(copy.deepcopy(self.board))
         cloned_game.score_board = copy.deepcopy(self.score_board)
         return cloned_game
     
@@ -299,49 +342,40 @@ class JaguarGame:
         score -= len(moves_c) * 5
         return score
 
-def get_coord_board(coord: tuple[str, str]) -> tuple[int, int]:
-    coord_x =  int(coord[0]) - 1
-    coord_y = int(coord[1]) - 1
-    return coord_x, coord_y
+    @classmethod
+    def from_string_representation(cls, board_string: str) -> 'JaguarGame':
+        lines = board_string.split('\n')
+        new_board_state = []
+        for i in range(7): 
+            line = lines[i].strip()
+            if len(line) > 2:
+                content_line = line[1:-1]
+            else:
+                content_line = ''
+                    
+            row = []
 
-def check_jump_direction(origin: tuple[str, str],
-                         middle: tuple[str, str],
-                         destination: tuple[str, str],
-                         board) -> bool:
-    verification_list = []
+            for char in content_line:
+                if char == 'c' or char == 'o':
+                    row.append(char)
+                elif char == 'v':
+                    row.append('v')
+                elif char == ' ':
+                    row.append('') 
+                else:
+                    row.append(char if char in ['c', 'o', 'v'] else '')
+                        
+            if len(row) > 0 and len(row) != 5:
+                pass 
 
-    if origin[0] == middle[0] == destination[0]:
-        verification_list.append(True)
-
-    if origin[1] == middle[1] == destination[1]:
-        verification_list.append(True)
-
-    origin_int = [int(origin[0]), int(origin[1])]
-    middle_int = [int(middle[0]), int(middle[1])]
-    destination_int = [int(destination[0]), int(destination[1])]
-
-    x_check = origin_int[0] < middle_int[0] < destination_int[0]
-    y_check = origin_int[1] < middle_int[1] < destination_int[1]
-    if x_check and y_check:
-        verification_list.append(True)
-
-    x_check = origin_int[0] > middle_int[0] > destination_int[0]
-    y_check = origin_int[1] < middle_int[1] < destination_int[1]
-
-    if x_check and y_check:
-        verification_list.append(True)
-
-    x_check = origin_int[0] > middle_int[0] > destination_int[0]
-    y_check = origin_int[1] > middle_int[1] > destination_int[1]
-
-    if x_check and y_check:
-        verification_list.append(True)
-
-    x_check = origin_int[0] < middle_int[0] < destination_int[0]
-    y_check = origin_int[1] > middle_int[1] > destination_int[1]
-
-    if x_check and y_check:
-        verification_list.append(True)
+            if row:
+                new_board_state.append(row)
+                    
+        if len(new_board_state) != 7:
+            raise ValueError("Erro de Parsing: O tabuleiro reconstruído não tem 7 linhas.")
+                
+        new_instance = cls(board_state=new_board_state)
+        return new_instance
 
 
-    return len(verification_list) == 1
+    

@@ -45,7 +45,6 @@ def main(name):
     print(f"O jogo durou {duration:.2f} segundos.") 
     
     
-# Mantenha esta função fora da classe JaguarGame
 def evaluate_child_state(args):
     """Função auxiliar para a busca paralela."""
     cloned_game, depth, is_maximizing_player = args
@@ -94,7 +93,7 @@ def find_best_move(game: JaguarGame, depth: int, isMaximizingPlayer: bool):
     #notebook pessoal
     # num_cores = min(os.cpu_count(), 4)
     #ufpr
-    num_cores = min(os.cpu_count(), 14)
+    num_cores = min(os.cpu_count(), 1)
     with Pool(processes=num_cores) as pool:
             scores = pool.map(evaluate_child_state, tasks)
     
