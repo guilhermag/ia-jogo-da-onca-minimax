@@ -22,23 +22,6 @@ source venv/bin/activate
 echo "Instalando dependências Python..."
 pip install -r requirements.txt
 
-# --- 2. COMPILACAO DO CONTROLADOR C ---
-echo "Compilando programas C (controlador, exemplos)..."
-# Assumindo que o makefile e os arquivos C estão no diretório atual
-make clean # Limpa binários anteriores
-make       # Compila os novos binários
-
-# --- 3. INSTRUÇÕES PARA O USUÁRIO ---
-echo "================================================="
-echo "SETUP COMPLETO! PRONTO PARA CONECTAR NO REDIS:10001"
-echo "================================================="
-echo ">> ANTES DE INICIAR O AGENTE, VOCÊ DEVE RODAR:"
-echo ">> 1) O SERVIDOR REDIS: redis-server redis.conf"
-echo ">> 2) O CONTROLADOR: ./controlador ${AGENT_SIDE} 50 0"
-echo "-------------------------------------------------"
-echo "INICIANDO SEU AGENTE EM 5 SEGUNDOS..."
-sleep 5
-
 # --- 4. EXECUÇÃO DO AGENTE ---
 echo "EXECUTANDO AGENTE: python3 ${AGENT_SCRIPT} ${AGENT_SIDE} ${DEPTH}"
 python3 "${AGENT_SCRIPT}" "${AGENT_SIDE}" "${DEPTH}"
