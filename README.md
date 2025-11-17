@@ -1,5 +1,10 @@
 # Jogo da Onça — Minimax com Poda Alfa-Beta (INFO7017/UFPR)
 
+- Alunos:
+  - Guilherme de Araujo Gabriel - gagabriel@inf.ufpr.br
+  - Edney Carlos Kerscher - edneykerscher@gmail.com
+
+
 Implementação do Jogo da Onça com um agente de decisão baseado no algoritmo Minimax com poda Alfa-Beta, seguindo as especificações do arquivo trabalho.txt da disciplina INFO7017 — Inteligência Artificial (Mestrado em Informática/UFPR).
 
 ## Objetivo
